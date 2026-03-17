@@ -1,0 +1,69 @@
+name: qnq
+description: "QnQ - AI Agent App with multi-provider LLM, MCP, RAG, workflow & plugin system"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Database
+  isar: ^4.0.0-dev.14
+  isar_flutter_libs: ^4.0.0-dev.14
+
+  # Networking
+  dio: ^5.7.0
+
+  # UI
+  cupertino_icons: ^1.0.8
+  flutter_markdown: ^0.7.6
+  cached_network_image: ^3.4.1
+  flutter_animate: ^4.5.2
+
+  # Utils
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  path_provider: ^2.1.5
+  json_annotation: ^4.9.0
+  equatable: ^2.0.7
+  freezed_annotation: ^3.0.0
+  logger: ^2.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.14
+  riverpod_generator: ^2.6.3
+  isar_generator: ^4.0.0-dev.14
+  json_serializable: ^6.9.4
+  freezed: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/l10n/
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
