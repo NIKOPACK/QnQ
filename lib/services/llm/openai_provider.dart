@@ -36,8 +36,8 @@ class OpenAICompatibleProvider extends LLMProvider {
       'Authorization': 'Bearer $_apiKey',
       'Content-Type': 'application/json',
     };
-    if (_organizationId != null && _organizationId!.isNotEmpty) {
-      headers['OpenAI-Organization'] = _organizationId!;
+    if (_organizationId != null && _organizationId.isNotEmpty) {
+      headers['OpenAI-Organization'] = _organizationId;
     }
     return headers;
   }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qnq/gen/l10n/app_localizations.dart';
 import 'package:qnq/data/models/agent_model.dart';
-import 'package:qnq/data/models/provider_config_model.dart';
 import 'package:qnq/providers/agent_providers.dart';
 import 'package:qnq/providers/provider_config_providers.dart';
 import 'package:qnq/providers/service_providers.dart';
@@ -145,7 +144,7 @@ class _AgentBuilderScreenState extends ConsumerState<AgentBuilderScreen> {
 
             // Category
             DropdownButtonFormField<String>(
-              value: _category,
+              initialValue: _category,
               decoration: InputDecoration(
                 labelText: 'Category',
                 prefixIcon: const Icon(Icons.category),
@@ -166,7 +165,7 @@ class _AgentBuilderScreenState extends ConsumerState<AgentBuilderScreen> {
                 return Column(
                   children: [
                     DropdownButtonFormField<String>(
-                      value: _selectedProviderUid,
+                      initialValue: _selectedProviderUid,
                       decoration: InputDecoration(
                         labelText: l10n.modelProviders,
                         prefixIcon: const Icon(Icons.cloud),
@@ -187,7 +186,7 @@ class _AgentBuilderScreenState extends ConsumerState<AgentBuilderScreen> {
                     const SizedBox(height: 12),
                     if (_availableModels.isNotEmpty)
                       DropdownButtonFormField<String>(
-                        value: _selectedModel,
+                        initialValue: _selectedModel,
                         decoration: InputDecoration(
                           labelText: l10n.selectModel,
                           prefixIcon: const Icon(Icons.model_training),

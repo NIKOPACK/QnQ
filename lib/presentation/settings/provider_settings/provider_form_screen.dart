@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qnq/gen/l10n/app_localizations.dart';
 import 'package:qnq/data/models/provider_config_model.dart';
 import 'package:qnq/providers/provider_config_providers.dart';
 import 'package:qnq/providers/service_providers.dart';
@@ -87,7 +87,7 @@ class _ProviderFormScreenState extends ConsumerState<ProviderFormScreen> {
           children: [
             // Provider Type
             DropdownButtonFormField<ProviderTypeEnum>(
-              value: _providerType,
+              initialValue: _providerType,
               decoration: InputDecoration(
                 labelText: l10n.providerType,
                 prefixIcon: const Icon(Icons.category),
@@ -101,7 +101,7 @@ class _ProviderFormScreenState extends ConsumerState<ProviderFormScreen> {
               onChanged: (v) {
                 setState(() {
                   _providerType = v!;
-                  _baseUrlController.text = _defaultBaseUrl(v!);
+                  _baseUrlController.text = _defaultBaseUrl(v);
                 });
               },
             ),

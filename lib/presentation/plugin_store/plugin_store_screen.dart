@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qnq/gen/l10n/app_localizations.dart';
 
 class PluginStoreScreen extends StatelessWidget {
   const PluginStoreScreen({super.key});
