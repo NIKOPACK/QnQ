@@ -58,6 +58,10 @@ app.*.map.json
 /android/captures/
 /android/gradlew
 /android/gradlew.bat
+*.apk
+*.aab
+*.jks
+*.keystore
 
 # iOS/XCode related
 **/ios/Pods/
