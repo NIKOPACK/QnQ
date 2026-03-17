@@ -6,6 +6,7 @@ import 'package:qnq/data/models/agent_model.dart';
 import 'package:qnq/providers/agent_providers.dart';
 import 'package:qnq/providers/provider_config_providers.dart';
 import 'package:qnq/providers/service_providers.dart';
+import 'package:qnq/services/tools/tool_registry.dart';
 import 'package:uuid/uuid.dart';
 
 class AgentBuilderScreen extends ConsumerStatefulWidget {
@@ -31,6 +32,7 @@ class _AgentBuilderScreenState extends ConsumerState<AgentBuilderScreen> {
   String? _avatarEmoji;
   List<String> _availableModels = [];
   bool _isEditing = false;
+  final List<String> _selectedToolIds = [];
 
   static const _emojiOptions = ['🤖', '🧠', '💡', '🔮', '📝', '🎯', '🔧', '🌟', '🎨', '📊', '🔬', '🎭'];
   static const _categories = ['general', 'coding', 'writing', 'analysis'];
@@ -58,6 +60,8 @@ class _AgentBuilderScreenState extends ConsumerState<AgentBuilderScreen> {
         _maxTokens = agent.maxTokens;
         _category = agent.category;
         _avatarEmoji = agent.avatarEmoji ?? _emojiOptions[0];
+        _selectedToolIds.clear();
+        _selectedToolIds.addAll(agent.enabledToolIds);
       });
       if (agent.providerUid != null) {
         _loadModels(agent.providerUid!);
@@ -263,6 +267,36 @@ class _AgentBuilderScreenState extends ConsumerState<AgentBuilderScreen> {
               ],
             ),
             const SizedBox(height: 32),
+
+            // Tools Selection
+            Text('Tools & Plugins', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Card(
+              elevation: 0,
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: ToolRegistry().allTools.map((tool) {
+                  return CheckboxListTile(
+                    title: Text(tool.name),
+                    subtitle: Text(tool.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    secondary: const Icon(Icons.build_circle_outlined),
+                    value: _selectedToolIds.contains(tool.id),
+                    onChanged: (checked) {
+                      setState(() {
+                        if (checked == true) {
+                          _selectedToolIds.add(tool.id);
+                        } else {
+                          _selectedToolIds.remove(tool.id);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -310,8 +344,8 @@ class _AgentBuilderScreenState extends ConsumerState<AgentBuilderScreen> {
       ..modelName = _selectedModel
       ..systemPrompt = _systemPromptController.text.trim()
       ..temperature = _temperature
-      ..maxTokens = _maxTokens
-      ..category = _category;
+      ..category = _category
+      ..enabledToolIds = _selectedToolIds;
 
     await ref.read(agentsProvider.notifier).save(agent);
     if (mounted) context.pop();

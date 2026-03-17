@@ -85,13 +85,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: chatState.messages.length +
-                  (chatState.streamingContent.isNotEmpty ? 1 : 0),
+                  (chatState.streamingContent.isNotEmpty || chatState.activeToolCalls.isNotEmpty ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index < chatState.messages.length) {
-                  return _MessageBubble(message: chatState.messages[index]);
+                  final msg = chatState.messages[index];
+                  // Hide empty intermediate assistant messages that only invoked tools
+                  if (msg.role == MessageRoleEnum.assistant && msg.content.trim().isEmpty && msg.toolCalls != null) {
+                    return const SizedBox.shrink();
+                  }
+                  if (msg.role == MessageRoleEnum.tool) {
+                    return _ToolMessageBubble(message: msg);
+                  }
+                  return _MessageBubble(message: msg);
                 }
-                // Streaming message
-                return _StreamingBubble(content: chatState.streamingContent);
+                // Streaming message or active tool call indicator
+                return _StreamingBubble(
+                  content: chatState.streamingContent,
+                  activeToolCalls: chatState.activeToolCalls,
+                  agentName: 'Assistant',
+                );
               },
             ),
           ),
@@ -292,10 +304,91 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
+class _ToolMessageBubble extends StatefulWidget {
+  final Message message;
+
+  const _ToolMessageBubble({required this.message});
+
+  @override
+  State<_ToolMessageBubble> createState() => _ToolMessageBubbleState();
+}
+
+class _ToolMessageBubbleState extends State<_ToolMessageBubble> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final toolName = widget.message.toolName ?? 'Unknown Tool';
+    final isError = widget.message.isError;
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.85,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainer,
+          border: Border.all(
+            color: isError ? theme.colorScheme.error : theme.colorScheme.outlineVariant,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Theme(
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+            childrenPadding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+            leading: Icon(
+              Icons.build_circle_outlined,
+              color: isError ? theme.colorScheme.error : theme.colorScheme.primary,
+            ),
+            title: Text(
+              'Used tool: $toolName',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isError ? theme.colorScheme.error : null,
+              ),
+            ),
+            trailing: Icon(
+              _expanded ? Icons.expand_less : Icons.expand_more,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            onExpansionChanged: (val) => setState(() => _expanded = val),
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SelectableText(
+                  widget.message.content,
+                  style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _StreamingBubble extends StatelessWidget {
   final String content;
+  final List<String> activeToolCalls;
+  final String agentName;
 
-  const _StreamingBubble({required this.content});
+  const _StreamingBubble({
+    required this.content,
+    this.activeToolCalls = const [],
+    required this.agentName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -317,7 +410,7 @@ class _StreamingBubble extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Assistant',
+                    agentName,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.outline,
                     ),
@@ -334,22 +427,54 @@ class _StreamingBubble extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                  bottomLeft: Radius.circular(4),
-                  bottomRight: Radius.circular(16),
+            if (activeToolCalls.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.tertiaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.onTertiaryContainer,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Running ${activeToolCalls.join(', ')}...',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onTertiaryContainer,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: MarkdownBody(
-                data: content.isEmpty ? '...' : content,
-                selectable: false,
+            if (content.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                    bottomLeft: Radius.circular(4),
+                    bottomRight: Radius.circular(16),
+                  ),
+                ),
+                child: MarkdownBody(
+                  data: content,
+                  selectable: false,
+                ),
               ),
-            ),
           ],
         ),
       ),

@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>QnQ needs location access to provide location-aware responses through its agents.</string>
+
+<key>NSCameraUsageDescription</key>
+<string>QnQ needs camera access to take photos for your agents.</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>QnQ needs microphone access to record voice messages.</string>
+<key>NSCalendarsUsageDescription</key>
+<string>QnQ needs calendar access to manage your events.</string>
+
 </dict>
 </plist>

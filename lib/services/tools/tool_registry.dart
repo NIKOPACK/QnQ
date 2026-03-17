@@ -1,5 +1,11 @@
 import 'package:qnq/services/tools/agent_tool.dart';
+import 'package:qnq/services/tools/built_in/camera_tool.dart';
+import 'package:qnq/services/tools/built_in/calendar_tool.dart';
 import 'package:qnq/services/tools/built_in/datetime_tool.dart';
+import 'package:qnq/services/tools/built_in/file_tool.dart';
+import 'package:qnq/services/tools/built_in/location_tool.dart';
+import 'package:qnq/services/tools/built_in/sensors_tool.dart';
+import 'package:qnq/services/tools/built_in/voice_tool.dart';
 import 'package:qnq/services/tools/built_in/web_search_tool.dart';
 
 /// Central registry for all available AgentTools.
@@ -15,8 +21,12 @@ class ToolRegistry {
   void initialize() {
     _register(DateTimeTool());
     _register(WebSearchTool());
-    // Additional built-in tools will be added in future phases:
-    // LocationTool, CalendarTool, CameraTool, etc.
+    _register(LocationTool());
+    _register(FileTool());
+    _register(CameraTool());
+    _register(VoiceTool());
+    _register(CalendarTool());
+    _register(SensorsTool());
   }
 
   void _register(AgentTool tool) {
